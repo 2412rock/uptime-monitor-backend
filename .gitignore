@@ -1,0 +1,58 @@
+# Visual Studio-specific
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln.docstates
+
+# User-specific files
+*.user
+*.userosscache
+*.sln.ide
+
+# Build outputs
+bin/
+obj/
+out/
+TestResults/
+AppPackages/
+node_modules/
+
+# Logs & databases
+*.log
+logs/
+*.ldb
+*.sqlite
+*.sqlite3
+*.mdf
+*.db
+
+# ASP.NET-related
+wwwroot/dist/
+wwwroot/node_modules/
+appsettings*.json
+
+# Configuration
+secrets.json
+.env
+
+# Dependency caching
+packages/
+.nuget/
+project.lock.json
+
+# Entity Framework
+Migrations/
+
+# Docker
+docker-compose.override.yml
+.dockerignore
+
+# JetBrains Rider / ReSharper
+.idea/
+*.DotSettings.user
+
+# Temporary files
+~$*
+
+.vs/
