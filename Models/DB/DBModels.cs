@@ -25,7 +25,7 @@ namespace Uptime_Monitor_Backend.Models.DB
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
-        public int UserId { get; set; }
+        public string Username { get; set; }
 
 
         public string MonitorName { get; set; }
@@ -35,12 +35,14 @@ namespace Uptime_Monitor_Backend.Models.DB
 
         public int? Port { get; set; }
 
-
+        public bool CheckCertificate { get; set; }
         public string HttpMethod { get; set; }
 
         public string Domain { get; set; }
 
         public int? CheckInterval { get; set; }
+        public bool IsUp { get; set; }
+        public DateTime LastChecked { get; set; }
 
         // Navigation property
     }
@@ -54,8 +56,6 @@ namespace Uptime_Monitor_Backend.Models.DB
         public string Username { get; set; }
 
         public string SessionToken { get; set; }
-
-        public string DeviceId { get; set; }
 
         public DateTime LastActiveTime { get; set; }
 

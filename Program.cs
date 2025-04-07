@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Net;
 using System.Net.WebSockets;
 using Uptime_Monitor_Backend.Models;
+using Uptime_Monitor_Backend.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 //builder.WebHost.UseKestrel(options =>
@@ -64,6 +65,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<PasswordHashService>();
 builder.Services.AddTransient<MailService>();
+builder.Services.AddTransient<MonitorService>();
 
 builder.Services.AddSignalR();
 
