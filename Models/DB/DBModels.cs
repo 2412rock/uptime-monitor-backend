@@ -36,7 +36,7 @@ namespace Uptime_Monitor_Backend.Models.DB
         public int? Port { get; set; }
 
         public bool CheckCertificate { get; set; }
-        public string HttpMethod { get; set; }
+        public string? HttpMethod { get; set; }
 
         public string Domain { get; set; }
 

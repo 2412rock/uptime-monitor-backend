@@ -45,6 +45,8 @@ namespace Uptime_Monitor_Backend.Services
                 else if(req.MonitorType == "Ping")
                 {
                     // nothing
+                    _context.Monitors.Add(model);
+                    maybe.SetSuccess("Ok");
                 }
                 else
                 {
