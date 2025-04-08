@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using OverflowBackend.Filters;
+using Uptime_Monitor_Backend.Models.DB;
 using Uptime_Monitor_Backend.Models.Requests;
 using Uptime_Monitor_Backend.Services;
 
@@ -31,6 +32,15 @@ namespace Uptime_Monitor_Backend.Controllers
         public async Task<IActionResult> GetMonitors()
         {
             var result = await _monitorService.GetMonitors((string)HttpContext.Items["username"]);
+            return Ok(result);
+        }
+
+        [HttpPut]
+        [Route("editMonitor")]
+        [AuthorizationFilter]
+        public async Task<IActionResult> EditMonitor([FromBody] EditMonitorReq req)
+        {
+            var result = await _monitorService.EditMonitor(req, (string)HttpContext.Items["username"]);
             return Ok(result);
         }
     }

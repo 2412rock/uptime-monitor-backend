@@ -61,6 +61,66 @@ namespace Uptime_Monitor_Backend.Services
             return maybe;
         }
 
+        public async Task<Maybe<string>> EditMonitor(EditMonitorReq req, string username)
+        {
+            var maybe = new Maybe<string>();
+            try
+            {
+                var entry = await _context.Monitors.FirstOrDefaultAsync(e => e.Id == req.Id);
+                if(entry!= null && entry.Username != username)
+                {
+                    maybe.SetException("Access denied");
+                    return maybe;
+                }
+                if(entry != null)
+                {
+                    entry.MonitorName = req.MonitorName;
+                    entry.CheckInterval = req.CheckInterval;
+                    entry.Domain = req.Domain;
+
+                    if (req.MonitorType == "Http" || req.MonitorType == "Https")
+                    {
+                        entry.Port = req.Port;
+                        entry.HttpMethod = req.HttpMethod;
+                        entry.CheckCertificate = req.CheckCertificate;
+                        _context.Monitors.Update(entry);
+                        await _context.SaveChangesAsync();
+                        maybe.SetSuccess("Ok");
+                    }
+                    else if (req.MonitorType == "Ws" || req.MonitorType == "Wss")
+                    {
+                        entry.Port = req.Port;
+                        entry.CheckCertificate = req.CheckCertificate;
+                        _context.Monitors.Update(entry);
+                        await _context.SaveChangesAsync();
+                        maybe.SetSuccess("Ok");
+                    }
+                    else if (req.MonitorType == "Ping")
+                    {
+                        // nothing
+                        _context.Monitors.Update(entry);
+                        await _context.SaveChangesAsync();
+                        maybe.SetSuccess("Ok");
+                    }
+                    else
+                    {
+                        maybe.SetException("Invalid monitor type");
+                    }
+                }
+                else
+                {
+                    maybe.SetException("No entry found");
+                }
+            }
+            catch(Exception e)
+            {
+                maybe.SetException("Something went wrong");
+            }
+
+            return maybe;
+        }
+
+
         public async Task<Maybe<List<DBMonitor>>> GetMonitors(string username)
         {
             var monitors = new List<DBMonitor>();
