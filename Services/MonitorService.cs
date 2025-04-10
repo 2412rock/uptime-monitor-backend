@@ -8,51 +8,53 @@ namespace Uptime_Monitor_Backend.Services
 {
     public class MonitorService
     {
-        private readonly MonitorDBContext _context;
-        public MonitorService(MonitorDBContext context)
+        private readonly IDbContextFactory<MonitorDBContext> _dbContextFactory;
+        public MonitorService(IDbContextFactory<MonitorDBContext> dbContextFactoryt)
         {
-            _context = context;
+            _dbContextFactory = dbContextFactoryt;
         }
         public async Task<Maybe<string>> AddMonitor(AddMonitorReq req, string username)
         {
             var maybe = new Maybe<string>();
             try
             {
-                var model = new DBMonitor()
+                using (var _context = _dbContextFactory.CreateDbContext())
                 {
-                    Username = username,
-                    MonitorName = req.MonitorName,
-                    MonitorType = req.MonitorType,
-                    CheckInterval = req.CheckInterval,
-                    Domain = req.Domain
+                    var model = new DBMonitor()
+                    {
+                        Username = username,
+                        MonitorName = req.MonitorName,
+                        MonitorType = req.MonitorType,
+                        CheckInterval = req.CheckInterval,
+                        Url = req.Url
 
-                };
-                if (req.MonitorType == "Http" || req.MonitorType == "Https")
-                {
-                    model.Port = req.Port;
-                    model.HttpMethod = req.HttpMethod;
-                    model.CheckCertificate = req.CheckCertificate;
-                    _context.Monitors.Add(model);
-                    maybe.SetSuccess("Ok");
+                    };
+                    if (req.MonitorType == "Http")
+                    {
+                        model.HttpMethod = req.HttpMethod;
+                        model.CheckCertificate = req.CheckCertificate;
+                        _context.Monitors.Add(model);
+                        maybe.SetSuccess("Ok");
+                    }
+                    else if (req.MonitorType == "Socket")
+                    {
+                        model.CheckCertificate = req.CheckCertificate;
+                        _context.Monitors.Add(model);
+                        maybe.SetSuccess("Ok");
+                    }
+                    else if (req.MonitorType == "Ping")
+                    {
+                        // nothing
+                        _context.Monitors.Add(model);
+                        maybe.SetSuccess("Ok");
+                    }
+                    else
+                    {
+                        maybe.SetException("Invalid monitor type");
+                    }
+                    await _context.SaveChangesAsync();
                 }
-                else if(req.MonitorType == "Ws" || req.MonitorType == "Wss")
-                {
-                    model.Port = req.Port;
-                    model.CheckCertificate = req.CheckCertificate;
-                    _context.Monitors.Add(model);
-                    maybe.SetSuccess("Ok");
-                }
-                else if(req.MonitorType == "Ping")
-                {
-                    // nothing
-                    _context.Monitors.Add(model);
-                    maybe.SetSuccess("Ok");
-                }
-                else
-                {
-                    maybe.SetException("Invalid monitor type");
-                }
-                await _context.SaveChangesAsync();
+                
             }
             catch(Exception e)
             {
@@ -66,51 +68,53 @@ namespace Uptime_Monitor_Backend.Services
             var maybe = new Maybe<string>();
             try
             {
-                var entry = await _context.Monitors.FirstOrDefaultAsync(e => e.Id == req.Id);
-                if(entry!= null && entry.Username != username)
+                using (var _context = _dbContextFactory.CreateDbContext())
                 {
-                    maybe.SetException("Access denied");
-                    return maybe;
-                }
-                if(entry != null)
-                {
-                    entry.MonitorName = req.MonitorName;
-                    entry.CheckInterval = req.CheckInterval;
-                    entry.Domain = req.Domain;
+                    var entry = await _context.Monitors.FirstOrDefaultAsync(e => e.Id == req.Id);
+                    if (entry != null && entry.Username != username)
+                    {
+                        maybe.SetException("Access denied");
+                        return maybe;
+                    }
+                    if (entry != null)
+                    {
+                        entry.MonitorName = req.MonitorName;
+                        entry.CheckInterval = req.CheckInterval;
+                        entry.Url = req.Url;
 
-                    if (req.MonitorType == "Http" || req.MonitorType == "Https")
-                    {
-                        entry.Port = req.Port;
-                        entry.HttpMethod = req.HttpMethod;
-                        entry.CheckCertificate = req.CheckCertificate;
-                        _context.Monitors.Update(entry);
-                        await _context.SaveChangesAsync();
-                        maybe.SetSuccess("Ok");
-                    }
-                    else if (req.MonitorType == "Ws" || req.MonitorType == "Wss")
-                    {
-                        entry.Port = req.Port;
-                        entry.CheckCertificate = req.CheckCertificate;
-                        _context.Monitors.Update(entry);
-                        await _context.SaveChangesAsync();
-                        maybe.SetSuccess("Ok");
-                    }
-                    else if (req.MonitorType == "Ping")
-                    {
-                        // nothing
-                        _context.Monitors.Update(entry);
-                        await _context.SaveChangesAsync();
-                        maybe.SetSuccess("Ok");
+                        if (req.MonitorType == "Http")
+                        {
+                            entry.HttpMethod = req.HttpMethod;
+                            entry.CheckCertificate = req.CheckCertificate;
+                            _context.Monitors.Update(entry);
+                            await _context.SaveChangesAsync();
+                            maybe.SetSuccess("Ok");
+                        }
+                        else if (req.MonitorType == "Socket")
+                        {
+                            entry.CheckCertificate = req.CheckCertificate;
+                            _context.Monitors.Update(entry);
+                            await _context.SaveChangesAsync();
+                            maybe.SetSuccess("Ok");
+                        }
+                        else if (req.MonitorType == "Ping")
+                        {
+                            // nothing
+                            _context.Monitors.Update(entry);
+                            await _context.SaveChangesAsync();
+                            maybe.SetSuccess("Ok");
+                        }
+                        else
+                        {
+                            maybe.SetException("Invalid monitor type");
+                        }
                     }
                     else
                     {
-                        maybe.SetException("Invalid monitor type");
+                        maybe.SetException("No entry found");
                     }
                 }
-                else
-                {
-                    maybe.SetException("No entry found");
-                }
+                
             }
             catch(Exception e)
             {
@@ -127,11 +131,14 @@ namespace Uptime_Monitor_Backend.Services
             var maybe = new Maybe<List<DBMonitor>>();
             try
             {
-                var monitorsDb = await _context.Monitors
+                using (var _context = _dbContextFactory.CreateDbContext())
+                {
+                    var monitorsDb = await _context.Monitors
                         .Where(e => e.Username == username)
                         .ToListAsync();
 
-                maybe.SetSuccess(monitorsDb);
+                    maybe.SetSuccess(monitorsDb);
+                } 
             }
             catch(Exception e)
             {

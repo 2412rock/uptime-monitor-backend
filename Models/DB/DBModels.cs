@@ -33,16 +33,16 @@ namespace Uptime_Monitor_Backend.Models.DB
 
         public string MonitorType { get; set; } // Http/https/ping/ws/wss
 
-        public int? Port { get; set; }
 
         public bool CheckCertificate { get; set; }
         public string? HttpMethod { get; set; }
 
-        public string Domain { get; set; }
+        public string Url { get; set; }
 
         public int? CheckInterval { get; set; }
         public bool IsUp { get; set; }
         public DateTime LastChecked { get; set; }
+        public string? IsDownMessage { get; set; }
 
         // Navigation property
     }

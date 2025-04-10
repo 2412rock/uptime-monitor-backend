@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using OverflowBackend.Middleware;
@@ -66,8 +67,7 @@ builder.Services.AddTransient<AuthService>();
 builder.Services.AddTransient<PasswordHashService>();
 builder.Services.AddTransient<MailService>();
 builder.Services.AddTransient<MonitorService>();
-
-builder.Services.AddSignalR();
+builder.Services.AddTransient<MonitorChecker>();
 
 
 var saPassword = Environment.GetEnvironmentVariable("SA_PASSWORD");
@@ -75,11 +75,22 @@ var env = builder.Environment.EnvironmentName;
 string hostIp = Environment.GetEnvironmentVariable("DB_IP");
 
 Console.WriteLine($"Connecting to DB IP {hostIp}");
-builder.Services.AddDbContext<MonitorDBContext>(options =>
-    options.UseSqlServer($"Server={hostIp},1438;Database=UptimeMonitorDB;User Id=sa;Password={saPassword};TrustServerCertificate=True"));
+//builder.Services.AddDbContext<MonitorDBContext>(options =>
+//    options.UseSqlServer($"Server={hostIp},1438;Database=UptimeMonitorDB;User Id=sa;Password={saPassword};TrustServerCertificate=True"));
+builder.Services.AddDbContextFactory<MonitorDBContext>(options =>
+        options.UseSqlServer($"Server={hostIp},1438;Database=UptimeMonitorDB;User Id=sa;Password={saPassword};TrustServerCertificate=True"));
 builder.Logging.ClearProviders();
 var app = builder.Build();
 
+
+app.Lifetime.ApplicationStarted.Register(async () =>
+{
+    using (var scope = app.Services.CreateScope())
+    {
+        var startupService = scope.ServiceProvider.GetRequiredService<MonitorChecker>();
+        await startupService.Run();
+    }
+});
 
 
 app.UseCors("AllowAnyOrigin");

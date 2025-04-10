@@ -7,10 +7,9 @@ namespace Uptime_Monitor_Backend.Models.Requests
     {
         public string MonitorName { get; set; }
         public string MonitorType { get; set; } // Http/https/ping/ws/wss
-        public int? Port { get; set; }
         public string? HttpMethod { get; set; }
         public bool CheckCertificate { get; set; }
-        public string Domain { get; set; }
+        public string Url { get; set; }
         public int CheckInterval { get; set; }
     }
 
@@ -19,10 +18,9 @@ namespace Uptime_Monitor_Backend.Models.Requests
         public int Id { get; set; }
         public string MonitorName { get; set; }
         public string MonitorType { get; set; } // Http/https/ping/ws/wss
-        public int? Port { get; set; }
         public string? HttpMethod { get; set; }
         public bool CheckCertificate { get; set; }
-        public string Domain { get; set; }
+        public string Url { get; set; }
         public int CheckInterval { get; set; }
     }
 }
